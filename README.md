@@ -76,9 +76,9 @@ Key again, so copy it immediately.
 Please store the Application Key pair in a secure way, preferably encrypted
 when not in use by your software.
 
-## New: b2\_client Command Line Utility
+## b2\_client Command Line Utility
 
-Backblaze::B2V2Client now includes the 'b2\_client' command line utility to
+Backblaze::B2V2Client includes the 'b2\_client' command line utility to
 easily download or upload files from B2.  Please execute 'b2\_client help'
 for more details, and here are a few examples:
 
@@ -235,9 +235,9 @@ Example:
 ## b2\_bucket\_maker
 
 Creates a new bucket in your B2 account, given the name for the new
-bucket.  The bucket type will be set to 'allPrivate'.
+bucket.  The bucket type will be set to 'allPrivate',
 
-Will retrieve the new bucket's ID into:
+Will place the new bucket's ID into:
 
         $b2client->{buckets}{$bucket_name}{bucket_id}
 
@@ -246,6 +246,13 @@ See: https://www.backblaze.com/b2/docs/b2\_create\_bucket.html
 Example:
 
         $b2client->b2_bucket_maker('NewBucketName');
+
+By default the new bucket will be set to use the 'Server-Side 
+Encryption with Backblaze-Managed Keys (SSE-B2)' option 
+described here: https://www.backblaze.com/b2/docs/server\_side\_encryption.html
+You can send a second param to disable that (not recommended):
+
+        $b2client->b2_bucket_maker('UnEncryptedBucketName', 1);
 
 ## b2\_delete\_bucket
 

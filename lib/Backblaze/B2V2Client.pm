@@ -387,13 +387,20 @@ sub b2_get_file_info {
 sub b2_bucket_maker {
 	my $self = shift;
 
-	my ($bucket_name) = @_;
+	my ($bucket_name, $disable_encryption) = @_;
 
 	# can't proceed without the bucket_name
 	if (!$bucket_name) {
 		$self->error_tracker('The bucket_name must be provided for b2_bucket_maker().');
 		return;
 	}
+	
+	# unless instructed otherwise, we should encrypt the files in this bucket
+	my $encryption_settings = {
+			'mode' => undef,
+			'algorithm' => 'AES256',
+	};
+	$$encryption_settings{mode} = 'SSE-B2' unless ($disable_encryption);
 
 	# create the bucket...
 	$self->b2_talker(
@@ -403,6 +410,7 @@ sub b2_bucket_maker {
 			'accountId' => $self->{account_id},
 			'bucketName' => $bucket_name,
 			'bucketType' => 'allPrivate',
+			'defaultServerSideEncryption' => $encryption_settings,
 		},
 	);
 
@@ -827,9 +835,9 @@ Key again, so copy it immediately.
 Please store the Application Key pair in a secure way, preferably encrypted
 when not in use by your software.
 
-=head2 New: b2_client Command Line Utility
+=head2 b2_client Command Line Utility
 
-Backblaze::B2V2Client now includes the 'b2_client' command line utility to
+Backblaze::B2V2Client includes the 'b2_client' command line utility to
 easily download or upload files from B2.  Please execute 'b2_client help'
 for more details, and here are a few examples:
 
@@ -986,9 +994,9 @@ Example:
 =head2 b2_bucket_maker
 
 Creates a new bucket in your B2 account, given the name for the new
-bucket.  The bucket type will be set to 'allPrivate'.
+bucket.  The bucket type will be set to 'allPrivate',
 
-Will retrieve the new bucket's ID into:
+Will place the new bucket's ID into:
 
 	$b2client->{buckets}{$bucket_name}{bucket_id}
 
@@ -997,6 +1005,16 @@ See: https://www.backblaze.com/b2/docs/b2_create_bucket.html
 Example:
 
 	$b2client->b2_bucket_maker('NewBucketName');
+
+By default the new bucket will be set to use the 'Server-Side 
+Encryption with Backblaze-Managed Keys (SSE-B2)' option 
+described here: https://www.backblaze.com/b2/docs/server_side_encryption.html
+You can send a second param to disable that (not recommended):
+
+	$b2client->b2_bucket_maker('UnEncryptedBucketName', 1);
+	
+Also, if your app key does not have the 'writeBucketEncryption' then 
+encryption will be disabled.
 
 =head2 b2_delete_bucket
 
