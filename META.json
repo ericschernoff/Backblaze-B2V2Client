@@ -70,7 +70,7 @@
          "web" : "https://github.com/ericschernoff/Backblaze-B2V2Client"
       }
    },
-   "version" : "1.4",
+   "version" : "1.5",
    "x_contributors" : [
       "Eric Chernoff <eric@laravel.weaverstreet.net>",
       "Eric Chernoff <eric@mail.weaverqueue.com>",
