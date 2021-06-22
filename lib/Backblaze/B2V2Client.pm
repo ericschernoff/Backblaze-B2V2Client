@@ -395,23 +395,26 @@ sub b2_bucket_maker {
 		return;
 	}
 	
-	# unless instructed otherwise, we should encrypt the files in this bucket
-	my $encryption_settings = {
-			'mode' => undef,
-			'algorithm' => 'AES256',
+	# prepare the basics for our request
+	my $post_params = {
+		'accountId' => $self->{account_id},
+		'bucketName' => $bucket_name,
+		'bucketType' => 'allPrivate',
 	};
-	$$encryption_settings{mode} = 'SSE-B2' unless ($disable_encryption);
+
+	# unless instructed otherwise, we should encrypt the files in this bucket
+	unless ($disable_encryption) {
+		$$post_params{defaultServerSideEncryption} = {
+			'mode' => 'SSE-B2',
+			'algorithm' => 'AES256',
+		};
+	}
 
 	# create the bucket...
 	$self->b2_talker(
 		'url' => $self->{api_url}.'/b2api/v2/b2_create_bucket',
 		'authorization' => $self->{account_authorization_token},
-		'post_params' => {
-			'accountId' => $self->{account_id},
-			'bucketName' => $bucket_name,
-			'bucketType' => 'allPrivate',
-			'defaultServerSideEncryption' => $encryption_settings,
-		},
+		'post_params' => $post_params,
 	);
 
 	if ($self->{current_status} eq 'OK') { # if successful...

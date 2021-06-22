@@ -253,6 +253,10 @@ described here: https://www.backblaze.com/b2/docs/server\_side\_encryption.html
 You can send a second param to disable that (not recommended):
 
         $b2client->b2_bucket_maker('UnEncryptedBucketName', 1);
+        
+
+Also, if your app key does not have the 'writeBucketEncryption' then 
+encryption will be disabled.
 
 ## b2\_delete\_bucket
 
