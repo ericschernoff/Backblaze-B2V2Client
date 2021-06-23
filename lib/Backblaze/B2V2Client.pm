@@ -307,10 +307,11 @@ sub b2_list_buckets {
 # method to retrieve file names / info from a bucket
 # this client library is bucket-name-centric, so it looks for the bucket name as a arg
 # if there are more than 1000 files, then call this repeatedly
+our $B2_MAX_FILE_COUNT = 1000;
 sub b2_list_file_names {
 	my $self = shift;
 
-	my ($bucket_name) = @_;
+	my ($bucket_name,$prefix,$delimiter,$startFileName,$maxFileCount) = @_;
 
 	# bucket_name is required
 	if (!$bucket_name) {
@@ -329,9 +330,11 @@ sub b2_list_file_names {
 		'url' => $self->{api_url}.'/b2api/v2/b2_list_file_names',
 		'authorization' => $self->{account_authorization_token},
 		'post_params' => {
-			'accountId' => $self->{account_id},
-			'bucketId' => $self->{buckets}{$bucket_name}{bucket_id},
-			'startFileName' => $self->{buckets}{$bucket_name}{next_file_name},
+			'bucketId'      => $self->{buckets}{$bucket_name}{bucket_id},
+			'prefix'        => $prefix // undef,
+			'delimiter'     => $delimiter // undef,
+			'startFileName' => $startFileName // $self->{buckets}{$bucket_name}{next_file_name},
+			'maxFileCount'  => $maxFileCount // $B2_MAX_FILE_COUNT,
 		},
 	);
 
@@ -345,6 +348,9 @@ sub b2_list_file_names {
 			@{ $self->{buckets}{$bucket_name}{files} },
 			@{ $self->{b2_response}{files} }
 		);
+
+		# kindly return the request results as a refernce (arrayref)
+		return $self->{b2_response}{files};
 	}
 
 
@@ -967,8 +973,37 @@ Example:
 
 =head2 b2_list_file_names
 
+Required input is C<$bucket_name> as the first parameter. The following
+parameters are optional:
+
+=over 3
+
+=item C<$prefix>
+
+Allows one to specify a filename prefix or directory path, useful for buckets
+with a large number of files or many subdirectories. Default is undefined.
+
+=item C<$delimiter>
+
+Allows one to specify what is considered the delimiter for the file C<path> in
+the bucket. Default is undefined.
+
+=item C<$startFileName>
+
+Allows one to select where in the file list to start the results, since the max
+results for each call is 1000 files. This allows one to define the C<start> for
+emulating pagination of the results.
+
+=item C<$maxFileCount>
+
+The default is 1000, the ultimate maximum per the specification. The module
+default may be accessed via the package variable, C<$B2_MAX_FILE_COUNT>.
+
+=back
+
 Retrieves an array of file information hashes for a given bucket name.
-That array is added to @{ $b2client->{buckets}{$bucket_name}{files} }.
+That array is added to @{ $b2client->{buckets}{$bucket_name}{files} } and
+returned as an array reference to the list of file objects.
 
 See https://www.backblaze.com/b2/docs/b2_list_file_names.html ,
 especially the section for 'Response' to see what is included for those
@@ -978,9 +1013,35 @@ Note that B2 limits this response to 1000 entries, so if you have a very
 large bucket, you can call this method several times and check the
 value in $b2client->{buckets}{$bucket_name}{next_file_name} after each call.
 
-Example:
+Example 1: Basic call:
 
 	$b2client->b2_list_file_names('MyBucketName');
+
+Example 2: Basic call and capturing file list:
+
+        my $files_ref = $b2client->b2_list_file_names('MyBucketName');
+
+Example 3: Avoid initial API call to get C<bucket_id>:
+
+        # In order to avoid the initial API call to determine the BucketId, which is
+        # actually what B2 wants, one may set this directly if known ahead of time:
+
+        $b2client->{buckets}{q/MyBucketName/}->{bucket_id} = q{b9d516ba733afb62719c4};
+        my $files_ref = $b2client->b2_list_file_names('MyBucketName');
+
+Example 4: Using optional parameters to control results (Note: only C<$bucket_name> is required):
+
+        my $bucket_name = q{MyBucketName};
+        my $prefx = q{path/to/sub/directory/};
+        my $delimter = undef;
+        my $startFileName = undef;
+        my $maxFileCount = $b2client::B2_MAX_FILE_COUNT;
+
+        # $bucket_id look up hack
+        $b2client->{buckets}{$bucket_name}->{bucket_id} = q{b9d516ba733afb62719c4};
+
+        # actual call - parameter order matters
+        my $files_ref = $b2client->b2_list_file_names($bucket_name,$prefix,$delimiter,$startFileName,$maxFileCount)
 
 =head2 b2_get_file_info
 
