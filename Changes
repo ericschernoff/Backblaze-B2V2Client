@@ -2,6 +2,12 @@ Revision history for Perl extension Backblaze-B2V2Client
 
 {{$NEXT}}
 
+1.6 2021-06-23T04:16:17Z
+
+    - Enhance b2_list_file_names() to use options provided by the B2V2 API (thanks ESTRABD).
+    - Make sure all methods return a status value.
+    - Documentation improvements.
+
 1.5 2021-06-22T04:30:22Z
 
     - Create SSE / server-side encrypted buckets by default.

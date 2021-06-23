@@ -70,13 +70,14 @@
          "web" : "https://github.com/ericschernoff/Backblaze-B2V2Client"
       }
    },
-   "version" : "1.5",
+   "version" : "1.6",
    "x_contributors" : [
       "Eric Chernoff <eric@laravel.weaverstreet.net>",
       "Eric Chernoff <eric@mail.weaverqueue.com>",
       "Eric Chernoff <eric@weaverstreet.net>",
       "Eric Chernoff <ericschernoff@gmail.com>",
-      "estrabd <estrabd@gmail.com>"
+      "estrabd <estrabd@gmail.com>",
+      "root <root@majestica-dev.weaverstreet.net>"
    ],
    "x_serialization_backend" : "JSON::PP version 4.02",
    "x_static_install" : 1
