@@ -2,6 +2,10 @@ Revision history for Perl extension Backblaze-B2V2Client
 
 {{$NEXT}}
 
+1.7 2026-06-01T10:39:03Z
+
+    - FIx version number for PAUSE indexer
+
 1.6.1 2026-06-01T07:04:56Z
 
     - Notice of obsolescence and replacement by Backblaze::B2V4
